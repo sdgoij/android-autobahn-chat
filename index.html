@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, width=device-width"/>
+  <title>• chat •</title>
+  <style type="text/css">
+    html { height: 100% }
+    body { height: 100%; margin: 0 auto; padding: 0 }
+    #chat { height: 100%; margin: 5px; padding: 5px }
+
+    submit {
+      width: 96%;
+      height: 30px;
+      margin: 6px auto;
+      display: block;
+    }
+
+    ul {
+      list-style: none;
+      font-size: 15px;
+    }
+
+    li:nth-child(odd) {
+      background: #cdcdcd;
+    }
+
+    li {
+      padding: 5px 10px;
+      margin: 10px 0 0;
+      font-family: 'lucida grande',tahoma,verdana,arial,sans-serif;
+    }
+  </style>
+  <script type="text/javascript">
+    function WsEventDispatcher(url) {
+      var self = this;
+      var d = function(event, message) {
+        var fn = self._fn[event];
+        if (typeof fn != "undefined") {
+          for (var i in fn) {
+            fn[i](message);
+          }
+        }
+      };
+
+      this._fn = {};
+      this._ws = new WebSocket(url);
+
+      this._ws.onclose = function() { d("close", null); };
+      this._ws.onerror = function() { d("error", null); };
+      this._ws.onopen = function() { d("open", null); };
+      this._ws.onmessage = function(event) {
+        var o = JSON.parse(event.data);
+        d(o.event, o.data);
+      };
+    }
+
+    WsEventDispatcher.prototype.bind = function(name, fn) {
+      this._fn[name] = this._fn[name] || [];
+      this._fn[name].push(fn);
+      return this;
+    };
+
+    WsEventDispatcher.prototype.send = function(name, data) {
+      this._ws.send(JSON.stringify({event:name,data:data}));
+      return this;
+    };
+
+    WsEventDispatcher.prototype.close = function() {
+      this._ws.close();
+    }
+
+    var dispatcher;
+    var chat;
+
+    function init() {
+      dispatcher = new WsEventDispatcher("ws://localhost:8080/ws");
+      chat = document.getElementById("messages");
+
+      dispatcher.bind("open", function() {
+        console.log("WebSocket connection open");
+        register();
+      });
+
+      dispatcher.bind("close", function() {
+        console.log("WebSocket connection closed");
+      });
+
+      dispatcher.bind("message", function(event) {
+        console.log("Message: " + JSON.stringify(event));
+        show(event);
+      });
+
+      dispatcher.bind("registration", function(event) {
+        if (event.username == undefined) {
+          console.log("Invalid registration response: " + JSON.stringify(event));
+        }
+        console.log("username='"+event.username+"'");
+        dispatcher.send("message", {message:"[Connected]"});
+      });
+    }
+
+    function register() {
+      var username = "";
+      do {
+        username = window.prompt("Enter your username");
+      } while("" == username);
+      dispatcher.send("register", {username:username});
+    }
+
+    function send() {
+      console.log("send: " + document.newmessage.message.value);
+      dispatcher.send("message", {
+        message: document.newmessage.message.value,
+      });
+      document.newmessage.message.value = "";
+      return false;
+    }
+
+    function show(event) {
+
+      var username = document.createElement("span");
+      var message = document.createElement("span");
+      var li = document.createElement("li");
+
+      username.innerHTML = event.username + ": ";
+      username.style.marginRight = "5px";
+      username.style.fontStyle = "italic";
+      username.style.fontWeight = "bold";
+
+      message.innerHTML = event.message;
+      message.style.wordWrap = "break-word";
+
+      li.appendChild(username);
+      li.appendChild(message);
+
+      chat.appendChild(li);
+    }
+
+    window.addEventListener("load", init);
+  </script>
+</head>
+
+<body>
+  <div id="chat">
+
+    <div>
+      <ul id="messages" />
+    </div>
+
+    <div id="newmessageform">
+      <form name="newmessage" action="#" onsubmit="return send();">
+        <input type="text" name="message" value="" style="width: 90%">
+        <input type="submit" value="send" style="width: 5%">
+      </form>
+    </div>
+
+  </div>
+</body>
+
+</html>

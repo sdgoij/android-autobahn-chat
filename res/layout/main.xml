@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="1dp"
+    android:paddingRight="1dp" >
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/scrollView">
+
+        <TextView
+            android:id="@+id/chat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:autoLink="all"
+        />
+
+    </ScrollView>
+
+    <EditText
+        android:id="@+id/message"
+        android:layout_width="184dp"
+        android:layout_height="40dp"
+        android:hint="@string/hint_message"
+        android:inputType="textShortMessage|text|textMultiLine|textAutoCorrect"
+        android:layout_alignLeft="@+id/scrollView"
+        android:layout_alignTop="@+id/send"
+        android:layout_alignRight="@+id/chat"
+        android:layout_toLeftOf="@+id/send"/>
+    <Button
+        android:id="@+id/send"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+
+        android:text="@string/button_send"
+        android:layout_alignRight="@+id/scrollView"
+        android:layout_alignBottom="@+id/scrollView"/>
+</RelativeLayout>

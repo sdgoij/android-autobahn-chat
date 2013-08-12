@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">android-autobahn-chat</string>
+    <string name="button_send">Send</string>
+    <string name="button_connect">Connect</string>
+    <string name="hint_message">Message</string>
+</resources>
